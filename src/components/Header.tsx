@@ -16,6 +16,7 @@ import {
   Moon,
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useAlerts } from '../context/AlertContext';
 
 interface HeaderProps {
   currentTab: TabType;
@@ -37,6 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
   activeStock,
 }) => {
   const { theme, toggleTheme } = useTheme();
+  const { unreadCount, checkPriceAgainstAlerts } = useAlerts();
   const [tickerItems, setTickerItems] = useState(MARKET_TICKER_ITEMS);
 
   // Tab display name mapping
@@ -190,11 +192,18 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Notifications Button */}
           <button
             onClick={onOpenNotifications}
-            aria-label="Notifications"
+            aria-label={`Notifications (${unreadCount} unread)`}
+            title={`${unreadCount} notifications`}
             className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#101a2b] border border-[#1e293b] text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#16243c] relative transition-colors cursor-pointer"
           >
             <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#22d3ee]" />
+            {unreadCount > 0 ? (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#ef4444] text-white font-mono text-[9px] font-bold flex items-center justify-center shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            ) : (
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#64748b]/60" />
+            )}
           </button>
 
           {/* User Profile Avatar with Initials */}

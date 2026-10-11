@@ -235,3 +235,33 @@ export interface SentimentData {
   headlines: NewsSentimentItem[];
   shapImpactNote: string;
 }
+
+export interface PriceAlert {
+  id: string;
+  symbol: string;
+  stockName: string;
+  exchange: string;
+  currency: string;
+  condition: 'GREATER_THAN' | 'LESS_THAN';
+  targetPrice: number;
+  currentPrice: number;
+  createdAt: string;
+  active: boolean;
+  triggered: boolean;
+  triggeredAt?: string;
+  triggeredPrice?: number;
+  note?: string;
+}
+
+export interface SystemNotification {
+  id: string;
+  title: string;
+  desc: string;
+  time: string;
+  timestamp: number;
+  type: 'alert' | 'bull' | 'bear' | 'warning';
+  symbol?: string;
+  isRead: boolean;
+  alertId?: string;
+}
+
