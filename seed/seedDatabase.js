@@ -10,6 +10,9 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 
+// Fail fast if database is unreachable, do not hang buffering operations
+mongoose.set('bufferCommands', false);
+
 import {
   User,
   Stock,
