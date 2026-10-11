@@ -10,6 +10,7 @@ import { Navigation } from './components/Navigation';
 import { NotificationsModal } from './components/NotificationsModal';
 import { MonteCarloModal } from './components/MonteCarloModal';
 import { ExportDossierModal } from './components/ExportDossierModal';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Dedicated Screen Views
 import { DashboardScreen } from './components/screens/DashboardScreen';
@@ -81,7 +82,8 @@ export default function App() {
   };
 
   return (
-    <div className="bg-[#070d19] text-[#f1f5f9] font-sans min-h-screen antialiased flex flex-row selection:bg-[#22d3ee]/30">
+    <ThemeProvider>
+      <div className="bg-[#070d19] text-[#f1f5f9] font-sans min-h-screen antialiased flex flex-row selection:bg-[#22d3ee]/30 transition-colors duration-150">
       {/* Toast popup */}
       {toastMessage && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#16243c] border border-[#22d3ee]/50 text-[#f1f5f9] font-mono text-[12px] px-4 py-2 rounded-full shadow-2xl flex items-center gap-2.5 animate-fadeIn backdrop-blur-md">
@@ -226,5 +228,6 @@ export default function App() {
         activeStock={activeStock}
       />
     </div>
+  </ThemeProvider>
   );
 }

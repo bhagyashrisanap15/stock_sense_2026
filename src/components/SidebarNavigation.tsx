@@ -14,7 +14,10 @@ import {
   ChevronRight,
   Activity,
   Layers,
+  Sun,
+  Moon,
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface SidebarNavigationProps {
   currentTab: TabType;
@@ -31,6 +34,7 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   onToggleCollapse,
   activeStock,
 }) => {
+  const { theme, toggleTheme } = useTheme();
   const navItems: { id: TabType; label: string; icon: React.ReactNode; badge?: string }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5 shrink-0" /> },
     {
@@ -155,25 +159,61 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
         })}
       </nav>
 
-      {/* System Status Footer */}
-      <div className="p-3 border-t border-[#1e293b] bg-[#0a1120] font-mono text-[11px]">
+      {/* System Status & Theme Footer */}
+      <div className="p-3 border-t border-[#1e293b] bg-[#0a1120] font-mono text-[11px] space-y-2">
         {collapsed ? (
-          <div className="flex justify-center" title="Systems: Online • v2.4">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse" />
+          <div className="flex flex-col items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              className="w-8 h-8 rounded-lg bg-[#101a2b] hover:bg-[#16243c] border border-[#1e293b] flex items-center justify-center transition-colors cursor-pointer"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-[#f59e0b]" />
+              ) : (
+                <Moon className="w-4 h-4 text-[#0284c7]" />
+              )}
+            </button>
+            <div title="Systems: Online • v2.4">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse block" />
+            </div>
           </div>
         ) : (
-          <div className="space-y-1">
-            <div className="flex items-center justify-between text-[#94a3b8]">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse" />
-                <span>Systems Active</span>
+          <>
+            {/* Quick Theme Switcher Pill */}
+            <button
+              onClick={toggleTheme}
+              className="w-full flex items-center justify-between p-1.5 px-2.5 rounded-lg bg-[#101a2b] hover:bg-[#16243c] border border-[#1e293b] transition-colors text-[11px] cursor-pointer"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              <div className="flex items-center gap-2">
+                {theme === 'dark' ? (
+                  <Moon className="w-3.5 h-3.5 text-[#22d3ee]" />
+                ) : (
+                  <Sun className="w-3.5 h-3.5 text-[#f59e0b]" />
+                )}
+                <span className="text-[#f1f5f9] font-medium">
+                  {theme === 'dark' ? 'Dark Terminal' : 'Daylight Mode'}
+                </span>
+              </div>
+              <span className="text-[10px] text-[#22d3ee] font-semibold">
+                {theme === 'dark' ? 'LIGHT' : 'DARK'}
               </span>
-              <span className="text-[10px] text-[#22d3ee]">v2.4</span>
+            </button>
+
+            <div className="space-y-1 pt-1">
+              <div className="flex items-center justify-between text-[#94a3b8]">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse" />
+                  <span>Systems Active</span>
+                </span>
+                <span className="text-[10px] text-[#22d3ee]">v2.4</span>
+              </div>
+              <div className="text-[10px] text-[#64748b] truncate">
+                FastAPI + SHAP + Atlas
+              </div>
             </div>
-            <div className="text-[10px] text-[#64748b] truncate">
-              FastAPI + SHAP + Atlas
-            </div>
-          </div>
+          </>
         )}
       </div>
     </aside>

@@ -12,7 +12,10 @@ import {
   Grid,
   X,
   ChevronRight,
+  Sun,
+  Moon,
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface NavigationProps {
   currentTab: TabType;
@@ -27,6 +30,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   isOpenMobileDrawer = false,
   onCloseMobileDrawer,
 }) => {
+  const { theme, toggleTheme } = useTheme();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
 
   // 4 primary mobile bottom items + "More"
@@ -119,6 +123,31 @@ export const Navigation: React.FC<NavigationProps> = ({
                 className="w-8 h-8 rounded-full bg-[#16243c] text-[#94a3b8] hover:text-[#f1f5f9] flex items-center justify-center"
               >
                 <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Theme Toggle in Mobile Drawer */}
+            <div className="bg-[#070d19] p-3 rounded-xl border border-[#1e293b] flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                {theme === 'dark' ? (
+                  <Moon className="w-4 h-4 text-[#22d3ee]" />
+                ) : (
+                  <Sun className="w-4 h-4 text-[#f59e0b]" />
+                )}
+                <div>
+                  <span className="text-[12px] font-semibold text-[#f1f5f9] block">
+                    {theme === 'dark' ? 'Dark Terminal Mode' : 'Daylight Precision Mode'}
+                  </span>
+                  <span className="text-[10px] text-[#64748b] font-mono">
+                    {theme === 'dark' ? 'Institutional high-contrast dark' : 'Clean daytime high-contrast'}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={toggleTheme}
+                className="px-3 py-1.5 rounded-lg bg-[#16243c] hover:bg-[#1e3a5f] text-[#22d3ee] border border-[#22d3ee]/30 text-[11px] font-mono font-bold transition-colors cursor-pointer"
+              >
+                {theme === 'dark' ? 'Set Light' : 'Set Dark'}
               </button>
             </div>
 

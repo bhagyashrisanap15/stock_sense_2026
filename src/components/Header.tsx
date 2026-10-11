@@ -12,7 +12,10 @@ import {
   TrendingUp,
   TrendingDown,
   Sparkles,
+  Sun,
+  Moon,
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface HeaderProps {
   currentTab: TabType;
@@ -33,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleLive,
   activeStock,
 }) => {
+  const { theme, toggleTheme } = useTheme();
   const [tickerItems, setTickerItems] = useState(MARKET_TICKER_ITEMS);
 
   // Tab display name mapping
@@ -169,11 +173,25 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="hidden sm:inline">{isLive ? 'STREAMING' : 'OFFLINE'}</span>
           </button>
 
+          {/* Dark / Light Mode Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to daylight precision theme' : 'Switch to dark terminal theme'}
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#101a2b] border border-[#1e293b] text-[#94a3b8] hover:text-[#22d3ee] hover:bg-[#16243c] transition-all cursor-pointer"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-[#f59e0b] hover:rotate-45 transition-transform" />
+            ) : (
+              <Moon className="w-4 h-4 text-[#0284c7] hover:-rotate-12 transition-transform" />
+            )}
+          </button>
+
           {/* Notifications Button */}
           <button
             onClick={onOpenNotifications}
             aria-label="Notifications"
-            className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#101a2b] border border-[#1e293b] text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#16243c] relative transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#101a2b] border border-[#1e293b] text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#16243c] relative transition-colors cursor-pointer"
           >
             <Bell className="w-4 h-4" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#22d3ee]" />

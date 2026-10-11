@@ -13,13 +13,17 @@ import {
   Layers,
   Globe,
   Monitor,
+  Sun,
+  Moon,
 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface SettingsScreenProps {
   onShowToast: (msg: string) => void;
 }
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onShowToast }) => {
+  const { theme, setTheme } = useTheme();
   const [defaultMarket, setDefaultMarket] = useState<'NSE' | 'BSE' | 'US'>('NSE');
   const [defaultHorizon, setDefaultHorizon] = useState<TimeHorizon>('5 Days');
   const [showVolumeDefault, setShowVolumeDefault] = useState(true);
@@ -67,7 +71,46 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onShowToast }) =
           <span>User Interface &amp; Model Defaults</span>
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-[12px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-[12px]">
+          {/* Appearance Theme Mode */}
+          <div className="bg-[#070d19] p-3.5 rounded-xl border border-[#1e293b] space-y-2">
+            <label className="text-[#94a3b8] block text-[11px] uppercase">
+              Application Theme
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setTheme('dark');
+                  onShowToast('Dark terminal mode enabled');
+                }}
+                className={`py-2 px-2 rounded-lg border text-center font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  theme === 'dark'
+                    ? 'bg-[#22d3ee]/15 text-[#22d3ee] border-[#22d3ee]/40'
+                    : 'bg-[#101a2b] text-[#94a3b8] border-[#1e293b] hover:text-[#f1f5f9]'
+                }`}
+              >
+                <Moon className="w-3.5 h-3.5" />
+                <span>Dark</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTheme('light');
+                  onShowToast('Daylight precision mode enabled');
+                }}
+                className={`py-2 px-2 rounded-lg border text-center font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  theme === 'light'
+                    ? 'bg-[#22d3ee]/15 text-[#22d3ee] border-[#22d3ee]/40'
+                    : 'bg-[#101a2b] text-[#94a3b8] border-[#1e293b] hover:text-[#f1f5f9]'
+                }`}
+              >
+                <Sun className="w-3.5 h-3.5" />
+                <span>Light</span>
+              </button>
+            </div>
+          </div>
+
           {/* Default Market Universe */}
           <div className="bg-[#070d19] p-3.5 rounded-xl border border-[#1e293b] space-y-2">
             <label className="text-[#94a3b8] block text-[11px] uppercase">
