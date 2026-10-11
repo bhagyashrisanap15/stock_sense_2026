@@ -1,0 +1,6 @@
+{
+  "name": "StockSense AI - Explainable Quantitative Intelligence",
+  "description": "Institutional-grade Explainable AI (XAI) stock prediction and quantitative risk analytics dashboard powered by TreeSHAP feature attribution, ensemble models, and scenario simulations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
