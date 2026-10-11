@@ -1289,6 +1289,19 @@ export const WATCHLIST_ITEMS: WatchlistItem[] = [
     attention: 'Data Center Backlog'
   },
   {
+    symbol: 'MSFT',
+    name: 'Microsoft Corporation',
+    exchange: 'NASDAQ',
+    emoji: '💻',
+    price: '$428.15',
+    change: '+2.15%',
+    isPositive: true,
+    mlDirection: 'Bullish 84%',
+    riskVector: 'Low 38',
+    xaiSignal: 'Azure Cloud Expansion',
+    attention: 'Copilot Enterprise Monetization'
+  },
+  {
     symbol: 'TCS',
     name: 'Tata Consultancy Services',
     exchange: 'NSE',
@@ -1302,6 +1315,19 @@ export const WATCHLIST_ITEMS: WatchlistItem[] = [
     attention: 'Q4 Deal Book Bookings'
   },
   {
+    symbol: 'RELIANCE',
+    name: 'Reliance Industries',
+    exchange: 'NSE',
+    emoji: '🛢️',
+    price: '₹2,910.45',
+    change: '+0.77%',
+    isPositive: true,
+    mlDirection: 'Bullish 82%',
+    riskVector: 'Medium 52',
+    xaiSignal: 'Refining Margin Spread',
+    attention: 'Retail & 5G Monetization'
+  },
+  {
     symbol: 'INFY',
     name: 'Infosys Ltd',
     exchange: 'NSE',
@@ -1313,6 +1339,45 @@ export const WATCHLIST_ITEMS: WatchlistItem[] = [
     riskVector: 'Low 41',
     xaiSignal: 'Accumulation Channel',
     attention: 'Cloud Enterprise Renewals'
+  },
+  {
+    symbol: 'HDFCBANK',
+    name: 'HDFC Bank Limited',
+    exchange: 'NSE',
+    emoji: '🏦',
+    price: '₹1,440.30',
+    change: '-0.65%',
+    isPositive: false,
+    mlDirection: 'Neutral 61%',
+    riskVector: 'Medium 62',
+    xaiSignal: 'Consolidation Support',
+    attention: 'Post-Merger Deposit Ratio'
+  },
+  {
+    symbol: 'ICICIBANK',
+    name: 'ICICI Bank Limited',
+    exchange: 'NSE',
+    emoji: '📈',
+    price: '₹1,124.60',
+    change: '+0.85%',
+    isPositive: true,
+    mlDirection: 'Bullish 79%',
+    riskVector: 'Moderate 54',
+    xaiSignal: 'Credit Growth Inflow',
+    attention: 'NIM Stability Horizon'
+  },
+  {
+    symbol: 'SBIN',
+    name: 'State Bank of India',
+    exchange: 'NSE',
+    emoji: '🏛️',
+    price: '₹762.30',
+    change: '+1.95%',
+    isPositive: true,
+    mlDirection: 'Bullish 83%',
+    riskVector: 'Moderate 57',
+    xaiSignal: 'PSU Banking Re-rating',
+    attention: 'Asset Quality Improvement'
   }
 ];
 
