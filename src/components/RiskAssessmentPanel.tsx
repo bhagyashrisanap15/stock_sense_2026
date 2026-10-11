@@ -63,15 +63,26 @@ export const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
           </div>
         </div>
 
-        {onOpenMonteCarlo && (
-          <button
-            onClick={onOpenMonteCarlo}
-            className="px-3 py-1.5 rounded-xl bg-[#16243c] hover:bg-[#1e3a5f] text-[#22d3ee] border border-[#22d3ee]/30 flex items-center gap-1.5 font-mono text-[11px] font-semibold transition-colors self-start sm:self-auto"
-          >
-            <Play className="w-3.5 h-3.5 fill-[#22d3ee]" />
-            <span>Run Monte Carlo (10k Paths)</span>
-          </button>
-        )}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          {onOpenMonteCarlo && (
+            <button
+              onClick={onOpenMonteCarlo}
+              className="px-3 py-1.5 rounded-xl bg-[#16243c] hover:bg-[#1e3a5f] text-[#22d3ee] border border-[#22d3ee]/30 flex items-center gap-1.5 font-mono text-[11px] font-semibold transition-colors cursor-pointer"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>3D Vol Surface</span>
+            </button>
+          )}
+          {onOpenMonteCarlo && (
+            <button
+              onClick={onOpenMonteCarlo}
+              className="px-3 py-1.5 rounded-xl bg-[#16243c] hover:bg-[#1e3a5f] text-[#94a3b8] hover:text-[#f1f5f9] border border-[#1e293b] items-center gap-1.5 font-mono text-[11px] font-semibold transition-colors cursor-pointer hidden sm:flex"
+            >
+              <Play className="w-3.5 h-3.5 fill-[#94a3b8]" />
+              <span>Monte Carlo</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Quantitative Metrics Grid */}
@@ -99,9 +110,17 @@ export const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
           <div className="flex items-baseline gap-1.5">
             <span className="text-[18px] font-bold text-[#f1f5f9]">{stock.volatilityAnn}%</span>
           </div>
-          <span className="text-[10px] text-[#64748b] block">
-            Downside dev: {stock.downsideDev}%
-          </span>
+          <div className="flex items-center justify-between text-[10px] pt-0.5">
+            <span className="text-[#64748b]">Downside: {stock.downsideDev}%</span>
+            {onOpenMonteCarlo && (
+              <button
+                onClick={onOpenMonteCarlo}
+                className="text-[#22d3ee] hover:underline font-semibold"
+              >
+                3D Surface →
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Metric 3: Max Drawdown */}

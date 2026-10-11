@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { StockData } from '../../types/stock';
+import { VolatilitySurface3D } from '../VolatilitySurface3D';
 
 interface RiskMatrixScreenProps {
   stock: StockData;
   onOpenMonteCarlo: () => void;
 }
 
+export type RiskViewTab = 'volatility-surface' | 'factor-matrix' | 'unified';
+
 export const RiskMatrixScreen: React.FC<RiskMatrixScreenProps> = ({
   stock,
   onOpenMonteCarlo,
 }) => {
+  const [activeTab, setActiveTab] = useState<RiskViewTab>('volatility-surface');
   const [vivaMode, setVivaMode] = useState(true);
   const [showWeights, setShowWeights] = useState(false);
 
@@ -18,7 +22,7 @@ export const RiskMatrixScreen: React.FC<RiskMatrixScreenProps> = ({
   const strokeOffset = circumference - (circumference * stock.riskScore) / 100;
 
   return (
-    <div className="flex flex-col w-full space-y-3 pb-6 animate-fadeIn">
+    <div className="flex flex-col w-full space-y-4 pb-6 animate-fadeIn">
       {/* Asset Metadata & Quantitative Status Header */}
       <div className="flex items-center justify-between bg-[#1c1f2a] p-3.5 rounded-xl shadow-md border border-[#262a35]/60">
         <div className="flex items-center gap-2.5">
@@ -58,27 +62,79 @@ export const RiskMatrixScreen: React.FC<RiskMatrixScreenProps> = ({
         </div>
       </div>
 
-      {/* Educational Learning Mode Interactive Bar */}
-      <div className="flex items-center justify-between bg-[#171b26] px-3.5 py-2.5 rounded-lg border border-[#262a35]/60">
+      {/* Navigation Sub-Tabs: 3D Volatility Surface vs Factor Scorecard */}
+      <div className="flex items-center justify-between flex-wrap gap-2 bg-[#171b26] p-1.5 rounded-xl border border-[#262a35]/60 font-mono text-[12px]">
         <div className="flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-[18px] text-[#c0c1ff]">school</span>
-          <span className="font-sans text-[13px] font-medium text-[#dfe2f1]">
-            Engineering Viva Mode
-          </span>
-          <span className="px-1.5 py-0.2 bg-[#c0c1ff]/20 text-[#c0c1ff] rounded font-mono text-[10px] font-semibold">
-            XAI
-          </span>
+          <button
+            onClick={() => setActiveTab('volatility-surface')}
+            className={`px-3 py-1.5 rounded-lg flex items-center gap-2 transition-all cursor-pointer ${
+              activeTab === 'volatility-surface'
+                ? 'bg-[#4cd7f6] text-[#070d19] font-bold shadow-md shadow-[#4cd7f6]/20'
+                : 'text-[#c7c4d7] hover:text-[#dfe2f1] hover:bg-[#262a35]'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">view_in_ar</span>
+            <span>3D Volatility Surface &amp; Options Risk</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/20 uppercase font-semibold">
+              D3 3D
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('factor-matrix')}
+            className={`px-3 py-1.5 rounded-lg flex items-center gap-2 transition-all cursor-pointer ${
+              activeTab === 'factor-matrix'
+                ? 'bg-[#4cd7f6] text-[#070d19] font-bold shadow-md shadow-[#4cd7f6]/20'
+                : 'text-[#c7c4d7] hover:text-[#dfe2f1] hover:bg-[#262a35]'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">grid_view</span>
+            <span>Factor Stress &amp; VaR Matrix</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('unified')}
+            className={`px-3 py-1.5 rounded-lg flex items-center gap-2 transition-all cursor-pointer ${
+              activeTab === 'unified'
+                ? 'bg-[#4cd7f6] text-[#070d19] font-bold shadow-md shadow-[#4cd7f6]/20'
+                : 'text-[#c7c4d7] hover:text-[#dfe2f1] hover:bg-[#262a35]'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">dashboard_customize</span>
+            <span>Unified View</span>
+          </button>
         </div>
-        <label className="relative inline-flex items-center cursor-pointer select-none">
-          <input
-            checked={vivaMode}
-            onChange={(e) => setVivaMode(e.target.checked)}
-            className="sr-only peer"
-            type="checkbox"
-          />
-          <div className="w-10 h-5 bg-[#313540] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#dfe2f1] after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#8083ff]"></div>
-        </label>
+
+        {/* Educational Learning Mode Interactive Bar */}
+        <div className="flex items-center gap-2 px-2 py-1">
+          <div className="flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px] text-[#c0c1ff]">school</span>
+            <span className="font-sans text-[12px] font-medium text-[#dfe2f1]">
+              Engineering Viva Mode
+            </span>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer select-none">
+            <input
+              checked={vivaMode}
+              onChange={(e) => setVivaMode(e.target.checked)}
+              className="sr-only peer"
+              type="checkbox"
+            />
+            <div className="w-9 h-4.5 bg-[#313540] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#dfe2f1] after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-[#8083ff]"></div>
+          </label>
+        </div>
       </div>
+
+      {/* 3D Volatility Surface View */}
+      {(activeTab === 'volatility-surface' || activeTab === 'unified') && (
+        <div className="space-y-3 animate-fadeIn">
+          <VolatilitySurface3D stock={stock} />
+        </div>
+      )}
+
+      {/* Multi-Factor Scorecard & VaR View */}
+      {(activeTab === 'factor-matrix' || activeTab === 'unified') && (
+        <div className="space-y-3 animate-fadeIn">
 
       {/* Primary Score & Gauge Panel */}
       <div className="bg-[#1c1f2a] rounded-xl p-3.5 shadow-md space-y-3 relative overflow-hidden border border-[#262a35]/60">
@@ -439,6 +495,13 @@ export const RiskMatrixScreen: React.FC<RiskMatrixScreenProps> = ({
             <span className="inline-block px-1.5 py-0.5 rounded bg-[#262a35] text-[#4cd7f6] font-sans text-[10px]">
               252-Day σ × √252
             </span>
+            <button
+              onClick={() => setActiveTab('volatility-surface')}
+              className="w-full mt-2 py-1 px-2 rounded bg-[#4cd7f6]/10 hover:bg-[#4cd7f6]/20 text-[#4cd7f6] text-[10px] font-mono font-semibold flex items-center justify-center gap-1 border border-[#4cd7f6]/30 transition-colors cursor-pointer"
+            >
+              <span>Explore 3D Vol Surface</span>
+              <span className="material-symbols-outlined text-[12px]">view_in_ar</span>
+            </button>
             {vivaMode && (
               <div className="bg-[#171b26] p-2 rounded font-mono text-[10px] text-[#dfe2f1] mt-1 leading-snug">
                 Annual standard deviation of daily logarithmic returns. Moderate band compared to sector average (21.2%).
@@ -505,6 +568,8 @@ export const RiskMatrixScreen: React.FC<RiskMatrixScreenProps> = ({
           Monte Carlo simulation (10,000 iterations): 91.4% probability of {stock.symbol} remaining above {stock.invalidationLevel} support level through the upcoming earnings release cycle.
         </p>
       </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
       case 'predictions':
         return 'Market Predictions';
       case 'risk-matrix':
-        return 'Risk Assessment';
+        return 'Risk & 3D Volatility';
       case 'xai-explainability':
         return 'Explainable AI';
       case 'watchlist':

@@ -45,9 +45,9 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
     },
     {
       id: 'risk-matrix',
-      label: 'Risk Assessment',
+      label: 'Risk & 3D Volatility',
       icon: <ShieldAlert className="w-5 h-5 shrink-0" />,
-      badge: 'VaR',
+      badge: '3D Vol',
     },
     {
       id: 'xai-explainability',

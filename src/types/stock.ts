@@ -179,6 +179,50 @@ export interface PortfolioHolding {
   riskVector: string;
   riskVectorColor: 'Low' | 'Med' | 'High';
   shapDriver: string;
+  dividendYield?: number; // e.g. 1.95 (%)
+  dps?: number; // Dividend per share ₹
+  payoutRatio?: number; // e.g. 48.2 (%)
+}
+
+export interface HoldingDividendData {
+  symbol: string;
+  name: string;
+  exchange: string;
+  qty: number;
+  curPrice: number;
+  curValue: number;
+  dividendYield: number; // in %
+  dps: number; // Dividend per share in ₹
+  payoutRatio: number; // in %
+  growth3Y: number; // 3-year dividend CAGR %
+  fcfCoverage: number; // FCF coverage multiple e.g. 2.1x
+  frequency: 'Quarterly' | 'Semi-Annual' | 'Annual';
+  nextExDate: string;
+  nextPayoutPerShare: number;
+  safetyScore: number; // 0 - 100
+  safetyRating: 'Very Safe' | 'Safe' | 'Moderate' | 'High Risk';
+  annualIncome: number; // qty * dps
+  monthlyRunRate: number; // annualIncome / 12
+  // Monthly expected cashflow in ₹ for [Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec]
+  monthlyCashflows: number[];
+}
+
+export interface PortfolioDividendSummary {
+  totalAnnualIncome: number;
+  weightedYield: number;
+  weightedPayoutRatio: number;
+  monthlyAverageIncome: number;
+  portfolioValue: number;
+  safetyScore: number;
+  benchmarkYield: number; // e.g. 1.22% for NIFTY 50
+  benchmarkPayoutRatio: number; // e.g. 35.0%
+  holdings: HoldingDividendData[];
+  monthlyAggregates: {
+    month: string;
+    monthIndex: number;
+    amount: number;
+    contributors: { symbol: string; amount: number; dps: number }[];
+  }[];
 }
 
 export interface PriceAlert {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PortfolioHolding } from '../../types/stock';
 import { CORE_HOLDINGS } from '../../data/stocksData';
+import { DividendAnalysisWidget } from '../DividendAnalysisWidget';
 import {
   Briefcase,
   PieChart,
@@ -11,6 +12,7 @@ import {
   FileText,
   DollarSign,
   Download,
+  Coins,
 } from 'lucide-react';
 
 interface PortfolioScreenProps {
@@ -142,6 +144,12 @@ export const PortfolioScreen: React.FC<PortfolioScreenProps> = ({
           })}
         </div>
       </div>
+
+      {/* Dividend Analysis & Passive Income Stream Widget */}
+      <DividendAnalysisWidget
+        holdings={holdings}
+        onSelectStockAndTab={onSelectStockAndTab}
+      />
 
       {/* Holdings List Table / Cards */}
       <div className="bg-[#101a2b] rounded-2xl border border-[#1e293b] p-4 overflow-hidden space-y-3">

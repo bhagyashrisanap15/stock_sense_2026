@@ -37,7 +37,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   const primaryItems = [
     { id: 'dashboard' as TabType, label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
     { id: 'predictions' as TabType, label: 'Predictions', icon: <TrendingUp className="w-5 h-5" /> },
-    { id: 'risk-matrix' as TabType, label: 'Risk', icon: <ShieldAlert className="w-5 h-5" /> },
+    { id: 'risk-matrix' as TabType, label: 'Risk / 3D', icon: <ShieldAlert className="w-5 h-5" /> },
     { id: 'xai-explainability' as TabType, label: 'XAI', icon: <Cpu className="w-5 h-5" /> },
   ];
 

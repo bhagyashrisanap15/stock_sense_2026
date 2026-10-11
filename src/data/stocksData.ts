@@ -1187,7 +1187,10 @@ export const CORE_HOLDINGS: PortfolioHolding[] = [
     directionProb: 78,
     riskVector: 'Low (38)',
     riskVectorColor: 'Low',
-    shapDriver: 'Cross-Currency Margins'
+    shapDriver: 'Cross-Currency Margins',
+    dividendYield: 1.96,
+    dps: 78.00,
+    payoutRatio: 48.2
   },
   {
     symbol: 'RELIANCE',
@@ -1206,7 +1209,10 @@ export const CORE_HOLDINGS: PortfolioHolding[] = [
     directionProb: 82,
     riskVector: 'Med (52)',
     riskVectorColor: 'Med',
-    shapDriver: 'GRM Spread Inflow'
+    shapDriver: 'GRM Spread Inflow',
+    dividendYield: 0.34,
+    dps: 10.00,
+    payoutRatio: 14.8
   },
   {
     symbol: 'HDFCBANK',
@@ -1225,7 +1231,10 @@ export const CORE_HOLDINGS: PortfolioHolding[] = [
     directionProb: 61,
     riskVector: 'Med (62)',
     riskVectorColor: 'Med',
-    shapDriver: 'Deposit Cost Pressure'
+    shapDriver: 'Deposit Cost Pressure',
+    dividendYield: 1.35,
+    dps: 19.50,
+    payoutRatio: 24.5
   },
   {
     symbol: 'INFY',
@@ -1244,9 +1253,91 @@ export const CORE_HOLDINGS: PortfolioHolding[] = [
     directionProb: 74,
     riskVector: 'Low (41)',
     riskVectorColor: 'Low',
-    shapDriver: 'Large Deal TCV Renewal'
+    shapDriver: 'Large Deal TCV Renewal',
+    dividendYield: 2.35,
+    dps: 36.00,
+    payoutRatio: 62.4
   }
 ];
+
+export const PORTFOLIO_DIVIDEND_DETAILS: Record<string, {
+  dividendYield: number;
+  dps: number;
+  payoutRatio: number;
+  growth3Y: number;
+  fcfCoverage: number;
+  frequency: 'Quarterly' | 'Semi-Annual' | 'Annual';
+  nextExDate: string;
+  nextPayoutPerShare: number;
+  safetyScore: number;
+  safetyRating: 'Very Safe' | 'Safe' | 'Moderate' | 'High Risk';
+  payoutSchedule: { monthIndex: number; dpsPortion: number }[];
+}> = {
+  TCS: {
+    dividendYield: 1.96,
+    dps: 78.00,
+    payoutRatio: 48.2,
+    growth3Y: 14.2,
+    fcfCoverage: 2.1,
+    frequency: 'Quarterly',
+    nextExDate: 'Oct 19, 2026',
+    nextPayoutPerShare: 12.00,
+    safetyScore: 96,
+    safetyRating: 'Very Safe',
+    payoutSchedule: [
+      { monthIndex: 0, dpsPortion: 12.00 }, // Jan
+      { monthIndex: 4, dpsPortion: 30.00 }, // May
+      { monthIndex: 6, dpsPortion: 24.00 }, // Jul
+      { monthIndex: 9, dpsPortion: 12.00 }  // Oct
+    ]
+  },
+  RELIANCE: {
+    dividendYield: 0.34,
+    dps: 10.00,
+    payoutRatio: 14.8,
+    growth3Y: 8.5,
+    fcfCoverage: 3.4,
+    frequency: 'Annual',
+    nextExDate: 'Aug 18, 2026',
+    nextPayoutPerShare: 10.00,
+    safetyScore: 92,
+    safetyRating: 'Very Safe',
+    payoutSchedule: [
+      { monthIndex: 7, dpsPortion: 10.00 }  // Aug
+    ]
+  },
+  HDFCBANK: {
+    dividendYield: 1.35,
+    dps: 19.50,
+    payoutRatio: 24.5,
+    growth3Y: 18.0,
+    fcfCoverage: 2.8,
+    frequency: 'Annual',
+    nextExDate: 'Jul 15, 2026',
+    nextPayoutPerShare: 19.50,
+    safetyScore: 89,
+    safetyRating: 'Safe',
+    payoutSchedule: [
+      { monthIndex: 6, dpsPortion: 19.50 }  // Jul
+    ]
+  },
+  INFY: {
+    dividendYield: 2.35,
+    dps: 36.00,
+    payoutRatio: 62.4,
+    growth3Y: 11.8,
+    fcfCoverage: 1.6,
+    frequency: 'Semi-Annual',
+    nextExDate: 'Oct 26, 2026',
+    nextPayoutPerShare: 18.00,
+    safetyScore: 88,
+    safetyRating: 'Safe',
+    payoutSchedule: [
+      { monthIndex: 5, dpsPortion: 18.00 }, // Jun
+      { monthIndex: 9, dpsPortion: 18.00 }  // Oct
+    ]
+  }
+};
 
 export const WATCHLIST_ITEMS: WatchlistItem[] = [
   {
