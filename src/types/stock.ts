@@ -181,6 +181,21 @@ export interface PortfolioHolding {
   shapDriver: string;
 }
 
+export interface PriceAlert {
+  id: string;
+  symbol: string;
+  upperThreshold?: number; // Target price (trigger when price >= upperThreshold)
+  lowerThreshold?: number; // Stop-loss price (trigger when price <= lowerThreshold)
+  enabled: boolean;
+  createdAt: string;
+  note?: string;
+  strategyTag?: 'Target Profit' | 'Stop Loss' | 'Breakout Alert' | 'Support Watch' | 'Custom';
+  isTriggered?: boolean;
+  triggeredMessage?: string;
+  triggeredAt?: string;
+  currency?: string;
+}
+
 export interface WatchlistItem {
   symbol: string;
   name: string;
@@ -193,6 +208,7 @@ export interface WatchlistItem {
   riskVector: string;
   xaiSignal: string;
   attention: string;
+  alert?: PriceAlert;
 }
 
 export interface NewsSentimentItem {

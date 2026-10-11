@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { WatchlistItem } from '../../types/stock';
+import { WatchlistItem, PriceAlert } from '../../types/stock';
 import { WATCHLIST_ITEMS, ALL_STOCKS } from '../../data/stocksData';
+import { PriceAlertModal } from '../PriceAlertModal';
 import {
   Bookmark,
   Plus,
@@ -21,6 +22,9 @@ import {
   SlidersHorizontal,
   ArrowUpDown,
   Sparkles,
+  Bell,
+  BellRing,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface WatchlistScreenProps {
@@ -31,7 +35,7 @@ interface WatchlistScreenProps {
 
 type ViewMode = 'split' | 'heatmap' | 'cards';
 type SortOption = 'perf-desc' | 'perf-asc' | 'symbol-asc' | 'risk-desc';
-type MarketFilter = 'all' | 'gainers' | 'losers' | 'nse' | 'nasdaq';
+type MarketFilter = 'all' | 'gainers' | 'losers' | 'alerts' | 'nse' | 'nasdaq';
 
 interface HeatmapColorConfig {
   bg: string;
@@ -43,6 +47,43 @@ interface HeatmapColorConfig {
   badgeText: string;
   label: string;
 }
+
+// Default initial price alerts for tracked assets
+const DEFAULT_PRICE_ALERTS: Record<string, PriceAlert> = {
+  NVDA: {
+    id: 'alert-NVDA-default',
+    symbol: 'NVDA',
+    upperThreshold: 920.0,
+    lowerThreshold: 850.0,
+    enabled: true,
+    createdAt: '2026-10-10T10:00:00Z',
+    strategyTag: 'Breakout Alert',
+    note: 'Data center AI Copilot multi-quarter backlog breakout level',
+    currency: '$',
+  },
+  TSLA: {
+    id: 'alert-TSLA-default',
+    symbol: 'TSLA',
+    upperThreshold: 195.0,
+    lowerThreshold: 175.0,
+    enabled: true,
+    createdAt: '2026-10-10T10:00:00Z',
+    strategyTag: 'Stop Loss',
+    note: 'Monitor $175 key structural support floor',
+    currency: '$',
+  },
+  TCS: {
+    id: 'alert-TCS-default',
+    symbol: 'TCS',
+    upperThreshold: 4100.0,
+    lowerThreshold: 3800.0,
+    enabled: true,
+    createdAt: '2026-10-10T10:00:00Z',
+    strategyTag: 'Target Profit',
+    note: 'Take profit on Q4 BFSI deal book momentum',
+    currency: '₹',
+  },
+};
 
 // Color coding based on percentage change scale
 const getHeatmapColor = (changePercent: number): HeatmapColorConfig => {
@@ -144,11 +185,98 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
   const [marketFilter, setMarketFilter] = useState<MarketFilter>('all');
   const [hoveredTile, setHoveredTile] = useState<string | null>(null);
 
+  // Price Alert state with localStorage persistence
+  const [alerts, setAlerts] = useState<Record<string, PriceAlert>>(() => {
+    try {
+      const saved = localStorage.getItem('stocksense_price_alerts');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error('Error loading saved price alerts', e);
+    }
+    return DEFAULT_PRICE_ALERTS;
+  });
+
+  const [selectedAlertStock, setSelectedAlertStock] = useState<WatchlistItem | null>(null);
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
+
   // Helper to extract numeric percentage change
   const parsePercent = (val: string): number => {
     const cleaned = val.replace('%', '').replace('+', '').trim();
     const num = parseFloat(cleaned);
     return isNaN(num) ? 0 : num;
+  };
+
+  // Helper to extract numeric price from formatted price string
+  const extractPrice = (priceStr: string): number => {
+    const clean = parseFloat(priceStr.replace(/[₹$,]/g, '').trim());
+    return isNaN(clean) ? 0 : clean;
+  };
+
+  // Evaluate whether alert triggers are met given the current price
+  const evaluateAlert = (alert: PriceAlert | undefined, priceStr: string): PriceAlert | undefined => {
+    if (!alert || !alert.enabled) return alert;
+    const currentPrice = extractPrice(priceStr);
+    if (currentPrice <= 0) return alert;
+
+    const isUpperTriggered =
+      alert.upperThreshold !== undefined && alert.upperThreshold > 0 && currentPrice >= alert.upperThreshold;
+    const isLowerTriggered =
+      alert.lowerThreshold !== undefined && alert.lowerThreshold > 0 && currentPrice <= alert.lowerThreshold;
+    const isTriggered = isUpperTriggered || isLowerTriggered;
+
+    let triggeredMessage = '';
+    if (isUpperTriggered) {
+      triggeredMessage = `Upper target reached: ${alert.currency || ''}${currentPrice.toFixed(2)} ≥ ${alert.currency || ''}${alert.upperThreshold}`;
+    } else if (isLowerTriggered) {
+      triggeredMessage = `Stop-loss breached: ${alert.currency || ''}${currentPrice.toFixed(2)} ≤ ${alert.currency || ''}${alert.lowerThreshold}`;
+    }
+
+    return {
+      ...alert,
+      isTriggered,
+      triggeredMessage: isTriggered ? triggeredMessage : undefined,
+    };
+  };
+
+  // Get alert for a stock with real-time evaluation
+  const getStockAlert = (item: WatchlistItem): PriceAlert | undefined => {
+    const rawAlert = alerts[item.symbol];
+    return evaluateAlert(rawAlert, item.price);
+  };
+
+  const handleOpenAlertModal = (item: WatchlistItem) => {
+    setSelectedAlertStock(item);
+    setIsAlertModalOpen(true);
+  };
+
+  const handleSaveAlert = (newAlert: PriceAlert) => {
+    setAlerts((prev) => {
+      const updated = {
+        ...prev,
+        [newAlert.symbol]: newAlert,
+      };
+      try {
+        localStorage.setItem('stocksense_price_alerts', JSON.stringify(updated));
+      } catch (e) {
+        console.error('Error saving price alert', e);
+      }
+      return updated;
+    });
+  };
+
+  const handleDeleteAlert = (symbol: string) => {
+    setAlerts((prev) => {
+      const updated = { ...prev };
+      delete updated[symbol];
+      try {
+        localStorage.setItem('stocksense_price_alerts', JSON.stringify(updated));
+      } catch (e) {
+        console.error('Error deleting price alert', e);
+      }
+      return updated;
+    });
   };
 
   // Filter items
@@ -162,12 +290,16 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
       const pct = parsePercent(item.change);
       if (marketFilter === 'gainers') return pct > 0;
       if (marketFilter === 'losers') return pct < 0;
+      if (marketFilter === 'alerts') {
+        const itemAlert = alerts[item.symbol];
+        return itemAlert && itemAlert.enabled;
+      }
       if (marketFilter === 'nse') return item.exchange.toUpperCase() === 'NSE' || item.exchange.toUpperCase() === 'BSE';
       if (marketFilter === 'nasdaq') return item.exchange.toUpperCase() === 'NASDAQ';
 
       return true;
     });
-  }, [items, searchQuery, marketFilter]);
+  }, [items, searchQuery, marketFilter, alerts]);
 
   // Sort items
   const sortedItems = useMemo(() => {
@@ -200,6 +332,8 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
         topGainer: null as WatchlistItem | null,
         topLoser: null as WatchlistItem | null,
         bullishBreadthPct: 0,
+        totalAlerts: 0,
+        triggeredAlerts: 0,
       };
     }
 
@@ -224,6 +358,12 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
     const averageChange = totalChange / items.length;
     const bullishBreadthPct = Math.round((advancers / items.length) * 100);
 
+    const totalAlerts = Object.values(alerts).filter((a) => a.enabled).length;
+    const triggeredAlerts = items.filter((item) => {
+      const evaluated = getStockAlert(item);
+      return evaluated?.isTriggered;
+    }).length;
+
     return {
       advancers,
       decliners,
@@ -232,8 +372,10 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
       topGainer,
       topLoser,
       bullishBreadthPct,
+      totalAlerts,
+      triggeredAlerts,
     };
-  }, [items]);
+  }, [items, alerts]);
 
   const handleRemove = (symbol: string) => {
     setItems((prev) => prev.filter((i) => i.symbol !== symbol));
@@ -288,9 +430,15 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
               <Flame className="w-3 h-3" />
               Live Heatmap Active
             </span>
+            {marketStats.triggeredAlerts > 0 && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30 font-bold animate-pulse">
+                <BellRing className="w-3 h-3" />
+                {marketStats.triggeredAlerts} Alert{marketStats.triggeredAlerts > 1 ? 's' : ''} Triggered
+              </span>
+            )}
           </div>
           <p className="text-[12px] font-mono text-[#94a3b8] mt-1">
-            Real-time percentage change heatmap &amp; ML quantitative intelligence
+            Real-time percentage change heatmap, custom price alert triggers &amp; XAI signals
           </p>
         </div>
 
@@ -390,23 +538,35 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
           </div>
         </div>
 
-        {/* Bullish Market Breadth */}
-        <div className="bg-[#070d19] p-2.5 rounded-lg border border-[#1e293b]">
-          <span className="text-[10px] font-mono uppercase text-[#64748b] block">Market Breadth</span>
-          <div className="flex items-center gap-2 mt-1">
-            <div className="flex-1 h-2 bg-[#16243c] rounded-full overflow-hidden flex">
-              <div
-                className="bg-emerald-500 h-full transition-all duration-300"
-                style={{ width: `${marketStats.bullishBreadthPct}%` }}
-              />
-              <div
-                className="bg-rose-500 h-full transition-all duration-300"
-                style={{ width: `${100 - marketStats.bullishBreadthPct}%` }}
-              />
-            </div>
-            <span className="text-[11px] font-mono font-bold text-[#f1f5f9]">
-              {marketStats.bullishBreadthPct}%
+        {/* Price Alerts Summary Tile */}
+        <div
+          onClick={() => setMarketFilter(marketFilter === 'alerts' ? 'all' : 'alerts')}
+          className={`cursor-pointer bg-[#070d19] hover:bg-[#16243c] p-2.5 rounded-lg border transition-colors ${
+            marketStats.triggeredAlerts > 0
+              ? 'border-amber-500/40 bg-amber-500/5'
+              : marketFilter === 'alerts'
+              ? 'border-[#22d3ee]/50'
+              : 'border-[#1e293b]'
+          }`}
+          title="Click to filter stocks with active price alerts"
+        >
+          <span className="text-[10px] font-mono uppercase text-[#64748b] flex items-center justify-between">
+            <span>Price Alerts</span>
+            {marketStats.triggeredAlerts > 0 ? (
+              <BellRing className="w-3 h-3 text-amber-400 animate-pulse" />
+            ) : (
+              <Bell className="w-3 h-3 text-[#22d3ee]" />
+            )}
+          </span>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-[14px] font-bold font-mono text-[#f1f5f9]">
+              {marketStats.totalAlerts} Active
             </span>
+            {marketStats.triggeredAlerts > 0 && (
+              <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/20 px-1 py-0.2 rounded">
+                {marketStats.triggeredAlerts} Alert{marketStats.triggeredAlerts > 1 ? 's' : ''}
+              </span>
+            )}
           </div>
         </div>
 
@@ -479,6 +639,21 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
                   }`}
                 >
                   All ({items.length})
+                </button>
+                <button
+                  onClick={() => setMarketFilter('alerts')}
+                  className={`px-2 py-1 rounded-md transition-colors flex items-center gap-1 ${
+                    marketFilter === 'alerts'
+                      ? 'bg-[#22d3ee]/20 text-[#22d3ee] font-semibold border border-[#22d3ee]/40'
+                      : 'text-[#94a3b8] hover:text-[#22d3ee]'
+                  }`}
+                  title="Show only stocks with active price triggers"
+                >
+                  <Bell className="w-3 h-3" />
+                  <span>Alerts ({marketStats.totalAlerts})</span>
+                  {marketStats.triggeredAlerts > 0 && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  )}
                 </button>
                 <button
                   onClick={() => setMarketFilter('gainers')}
@@ -554,6 +729,7 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
               const pct = parsePercent(item.change);
               const color = getHeatmapColor(pct);
               const isActive = item.symbol === activeStockSymbol;
+              const alert = getStockAlert(item);
 
               return (
                 <div
@@ -568,7 +744,7 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
                       ? 'ring-2 ring-[#22d3ee] ring-offset-2 ring-offset-[#070d19] shadow-[0_0_20px_rgba(34,211,238,0.25)]'
                       : 'hover:scale-[1.02] hover:shadow-lg'
                   }`}
-                  style={{ minHeight: '116px' }}
+                  style={{ minHeight: '124px' }}
                 >
                   {/* Top Header inside tile: Symbol & Exchange */}
                   <div className="flex items-start justify-between gap-1">
@@ -583,15 +759,41 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
                       </span>
                     </div>
 
-                    {isActive ? (
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-[#22d3ee] text-[#083344] font-extrabold uppercase shadow-sm">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="text-[14px] opacity-80 group-hover:scale-110 transition-transform">
-                        {item.emoji}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1">
+                      {/* Bell Icon in Heatmap */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenAlertModal(item);
+                        }}
+                        title={
+                          alert?.isTriggered
+                            ? `Alert Triggered: ${alert.triggeredMessage}`
+                            : alert?.enabled
+                            ? `Price Alert Active: Target ${alert.upperThreshold ? (alert.currency || '') + alert.upperThreshold : '-'}, Stop ${alert.lowerThreshold ? (alert.currency || '') + alert.lowerThreshold : '-'}`
+                            : `Set Price Alert for ${item.symbol}`
+                        }
+                        className={`p-1 rounded-md transition-all ${
+                          alert?.isTriggered
+                            ? 'text-amber-300 bg-amber-500/30 ring-1 ring-amber-400 animate-pulse'
+                            : alert?.enabled
+                            ? 'text-[#22d3ee] bg-black/40 ring-1 ring-[#22d3ee]/60'
+                            : 'text-white/60 hover:text-white hover:bg-black/20'
+                        }`}
+                      >
+                        {alert?.enabled ? <BellRing className="w-3 h-3" /> : <Bell className="w-3 h-3" />}
+                      </button>
+
+                      {isActive ? (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-[#22d3ee] text-[#083344] font-extrabold uppercase shadow-sm">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="text-[14px] opacity-80 group-hover:scale-110 transition-transform">
+                          {item.emoji}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Company Name Subtext */}
@@ -698,6 +900,7 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {sortedItems.map((item) => {
             const isSelected = item.symbol === activeStockSymbol;
+            const alert = getStockAlert(item);
 
             return (
               <div
@@ -708,7 +911,7 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
                     : 'border-[#1e293b]'
                 }`}
               >
-                {/* Top Row: Symbol, Exchange, Price, & Remove */}
+                {/* Top Row: Symbol, Exchange, Price, Bell Alert & Remove */}
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2.5">
                     <span className="text-[20px]">{item.emoji}</span>
@@ -748,6 +951,43 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
                       </span>
                     </div>
 
+                    {/* Bell Icon to configure / view Price Alert */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenAlertModal(item);
+                      }}
+                      title={
+                        alert?.isTriggered
+                          ? `Alert Triggered: ${alert.triggeredMessage}`
+                          : alert?.enabled
+                          ? `Edit price alert for ${item.symbol} (Target: ${alert.upperThreshold ? (alert.currency || '') + alert.upperThreshold : '-'}, Stop: ${alert.lowerThreshold ? (alert.currency || '') + alert.lowerThreshold : '-'})`
+                          : `Set custom price alert triggers for ${item.symbol}`
+                      }
+                      className={`p-1.5 rounded-lg transition-all relative ${
+                        alert?.isTriggered
+                          ? 'text-amber-300 bg-amber-500/20 border border-amber-500/50 shadow-[0_0_12px_rgba(245,158,11,0.3)] animate-pulse'
+                          : alert?.enabled
+                          ? 'text-[#22d3ee] bg-[#22d3ee]/15 border border-[#22d3ee]/40 shadow-sm'
+                          : 'text-[#64748b] hover:text-[#22d3ee] hover:bg-[#1e293b]'
+                      }`}
+                    >
+                      {alert?.enabled ? (
+                        <BellRing className="w-3.5 h-3.5" />
+                      ) : (
+                        <Bell className="w-3.5 h-3.5" />
+                      )}
+                      {alert?.enabled && (
+                        <span
+                          className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ${
+                            alert.isTriggered
+                              ? 'bg-amber-400 ring-2 ring-[#101a2b] animate-ping'
+                              : 'bg-[#22d3ee]'
+                          }`}
+                        />
+                      )}
+                    </button>
+
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -760,6 +1000,50 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
                     </button>
                   </div>
                 </div>
+
+                {/* Price Alert Indicator Row if configured */}
+                {alert && alert.enabled && (
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenAlertModal(item);
+                    }}
+                    className={`p-2 rounded-lg border text-[11px] font-mono flex items-center justify-between cursor-pointer transition-colors ${
+                      alert.isTriggered
+                        ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/15'
+                        : 'bg-[#070d19] border-[#1e293b] text-[#94a3b8] hover:border-[#22d3ee]/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 truncate">
+                      {alert.isTriggered ? (
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      ) : (
+                        <BellRing className="w-3.5 h-3.5 text-[#22d3ee] shrink-0" />
+                      )}
+                      <span className="font-bold text-[#f1f5f9] truncate">
+                        {alert.isTriggered ? 'TRIGGERED:' : `${alert.strategyTag || 'Alert'}:`}
+                      </span>
+                      <span className="truncate text-[10px]">
+                        {alert.isTriggered
+                          ? alert.triggeredMessage
+                          : alert.note || 'Active threshold monitoring'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0 pl-2">
+                      {alert.upperThreshold && (
+                        <span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                          ↑{alert.currency}{alert.upperThreshold}
+                        </span>
+                      )}
+                      {alert.lowerThreshold && (
+                        <span className="text-rose-400 font-bold bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">
+                          ↓{alert.currency}{alert.lowerThreshold}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Middle Row: ML Direction & Risk Vector */}
                 <div className="grid grid-cols-2 gap-2 bg-[#070d19] p-2.5 rounded-lg border border-[#1e293b] font-mono text-[11px]">
@@ -887,6 +1171,16 @@ export const WatchlistScreen: React.FC<WatchlistScreenProps> = ({
           </div>
         </div>
       )}
+
+      {/* Custom Price Alert Modal */}
+      <PriceAlertModal
+        isOpen={isAlertModalOpen}
+        onClose={() => setIsAlertModalOpen(false)}
+        stockItem={selectedAlertStock}
+        currentAlert={selectedAlertStock ? alerts[selectedAlertStock.symbol] : undefined}
+        onSaveAlert={handleSaveAlert}
+        onDeleteAlert={handleDeleteAlert}
+      />
     </div>
   );
 };
